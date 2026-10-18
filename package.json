@@ -1,0 +1,23 @@
+{
+  "name": "vault-lottery",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Randomizer games in the right sidebar: spin wheel, note lottery, dice & coin, team picker.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "test": "vitest run"
+  },
+  "author": "KfirG",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.21.5",
+    "obsidian": "latest",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.0"
+  }
+}
