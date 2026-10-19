@@ -291,7 +291,7 @@ export class NoteLotteryGame implements Game {
 		this.ctx.audio.gameEnd();
 		this.setBusy(false);
 		this.ctx.announce(`Picked note: ${file.basename}`);
-		if (this.d.confetti && this.reel) this.ctx.celebrate(this.reel.frame, undefined, this.reel.frame);
+		if (this.d.confetti && this.reel) this.ctx.celebrate(this.reel.frame);
 		void this.card?.show(file);
 		this.renderHistory();
 		if (this.d.autoOpen !== "off") {

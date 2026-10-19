@@ -45,11 +45,6 @@ export class VaultLotterySettingTab extends PluginSettingTab {
 						control: { type: "dropdown", key: "confettiIntensity", options: { low: "Low", medium: "Medium", high: "High" } },
 					},
 					{
-						name: "Confetti even with reduced motion",
-						desc: "When your system asks for reduced motion, a short glow is shown instead of confetti unless this is on.",
-						control: { type: "toggle", key: "confettiIgnoreReducedMotion" },
-					},
-					{
 						name: "Game options",
 						desc: "Each game's options, sounds and background are set inside the game, in the Vault Lottery view.",
 						searchable: false,

@@ -15,6 +15,8 @@ export class AudioManager {
 	private master: GainNode | null = null;
 	private els: Partial<Record<SlotName, HTMLAudioElement>> = {};
 	private elPaths: Partial<Record<SlotName, string>> = {};
+	/** A result's own end sound (a wheel slice's sound), played instead of the end sound slot. */
+	private resultEl: { path: string; el: HTMLAudioElement } | null = null;
 	private warnedMissing = new Set<string>();
 	private lastTick = 0;
 
@@ -26,7 +28,7 @@ export class AudioManager {
 	private menuBlocked = false;
 	private fadeTimer: number | null = null;
 	private endTimer: number | null = null;
-	private previewing: { slot: SlotName; el: HTMLAudioElement } | null = null;
+	private previewing: { key: string; el: HTMLAudioElement } | null = null;
 	private previewTickTimer: number | null = null;
 
 	constructor(private app: App, private data: () => PluginData) {}
@@ -141,14 +143,32 @@ export class AudioManager {
 	/** The slot's sound file in the vault. */
 	private sourceFor(name: SlotName): { key: string; url: string } | null {
 		const s = this.slot(name);
-		if (!s.path) return null;
-		const f = this.app.vault.getAbstractFileByPath(s.path);
+		return s.path ? this.sourceForPath(s.path) : null;
+	}
+
+	private sourceForPath(path: string): { key: string; url: string } | null {
+		const f = this.app.vault.getAbstractFileByPath(path);
 		if (f instanceof TFile) return { key: f.path, url: this.app.vault.getResourcePath(f) };
-		if (!this.warnedMissing.has(s.path)) {
-			this.warnedMissing.add(s.path);
-			new Notice(`Vault Lottery: audio file not found: ${s.path}`);
+		if (!this.warnedMissing.has(path)) {
+			this.warnedMissing.add(path);
+			new Notice(`Vault Lottery: audio file not found: ${path}`);
 		}
 		return null;
+	}
+
+	/** The <audio> element for a result's own end sound, at the end sound's volume. */
+	private resultElement(path: string): HTMLAudioElement | null {
+		const src = this.sourceForPath(path);
+		if (!src) return null;
+		if (this.resultEl?.path !== src.key) {
+			this.resultEl?.el.pause();
+			const el = new Audio(src.url);
+			el.preload = "auto";
+			this.resultEl = { path: src.key, el };
+		}
+		const el = this.resultEl.el;
+		el.volume = Math.max(0, Math.min(1, this.slot("endSound").volume));
+		return el;
 	}
 
 	/** The <audio> element of a slot, or null if the slot is off/empty/missing. */
@@ -233,14 +253,17 @@ export class AudioManager {
 		}
 	}
 
-	/** The game stopped: fade out spin music, play end sound, then resume menu music. */
-	gameEnd(): void {
+	/**
+	 * The game stopped: fade out spin music, play end sound, then resume menu music.
+	 * `soundPath` (a slice's own sound) plays instead of the end sound slot.
+	 */
+	gameEnd(soundPath?: string): void {
 		if (!this.gameRunning) return;
 		this.gameRunning = false;
 		this.clearTimers();
 		const spin = this.els.spinMusic;
 		if (spin && !spin.paused) this.fadeOut(spin, 300);
-		const end = this.element("endSound");
+		const end = (soundPath ? this.resultElement(soundPath) : null) ?? this.element("endSound");
 		const resume = () => {
 			this.endTimer = null;
 			if (this.gameRunning) return;
@@ -269,6 +292,7 @@ export class AudioManager {
 		this.gameRunning = false;
 		this.clearTimers();
 		this.els.spinMusic?.pause();
+		this.resultEl?.el.pause();
 		this.menuPausedForGame = false;
 		this.updateMenu();
 	}
@@ -308,24 +332,33 @@ export class AudioManager {
 
 	/** ▶ preview in the settings: toggles playback of a slot's file. Returns true if now playing. */
 	previewSlot(name: SlotName, onStop?: () => void): boolean {
+		return this.preview(name, () => this.sourceFor(name), this.slot(name).volume, onStop);
+	}
+
+	/** ▶ preview of a slice's own sound (at the end sound's volume). Returns true if now playing. */
+	previewFile(path: string, onStop?: () => void): boolean {
+		return this.preview(`file:${path}`, () => this.sourceForPath(path), this.slot("endSound").volume, onStop);
+	}
+
+	private preview(key: string, source: () => { url: string } | null, volume: number, onStop?: () => void): boolean {
 		if (this.previewing) {
 			const was = this.previewing;
 			was.el.pause();
 			this.previewing = null;
-			if (was.slot === name) return false;
+			if (was.key === key) return false;
 		}
-		const src = this.sourceFor(name);
+		const src = source();
 		if (!src) {
 			new Notice("Choose an audio file first.");
 			return false;
 		}
 		const el = new Audio(src.url);
-		el.volume = this.slot(name).volume;
+		el.volume = Math.max(0, Math.min(1, volume));
 		el.addEventListener("ended", () => {
 			if (this.previewing?.el === el) this.previewing = null;
 			onStop?.();
 		});
-		this.previewing = { slot: name, el };
+		this.previewing = { key, el };
 		this.safePlay(el);
 		// Long music: a 10 s taste is enough.
 		window.setTimeout(() => {
@@ -352,6 +385,7 @@ export class AudioManager {
 		this.menuPausedForGame = false;
 		this.menuActive = false;
 		for (const el of Object.values(this.els)) el?.pause();
+		this.resultEl?.el.pause();
 	}
 
 	destroy(): void {
@@ -362,8 +396,13 @@ export class AudioManager {
 				el.load();
 			}
 		}
+		if (this.resultEl) {
+			this.resultEl.el.removeAttribute("src");
+			this.resultEl.el.load();
+		}
 		this.els = {};
 		this.elPaths = {};
+		this.resultEl = null;
 		if (this.ctx) {
 			void this.ctx.close().catch(() => undefined);
 			this.ctx = null;

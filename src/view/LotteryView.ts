@@ -72,7 +72,7 @@ export class LotteryView extends ItemView {
 			viewEl: root,
 			announce: (t) => this.announce(t),
 			busyChanged: () => this.updateTabs(),
-			celebrate: (from, colors, glowEl) => this.celebrate(from, colors, glowEl),
+			celebrate: (from, colors) => this.celebrate(from, colors),
 			save: () => this.plugin.saveSoon(),
 		};
 
@@ -255,15 +255,13 @@ export class LotteryView extends ItemView {
 		window.setTimeout(() => this.liveEl.setText(text), 50);
 	}
 
-	private celebrate(from: HTMLElement, colors?: string[], glowEl?: HTMLElement | null): void {
+	private celebrate(from: HTMLElement, colors?: string[]): void {
 		const r = from.getBoundingClientRect();
 		this.confetti.fire({
 			x: r.left + r.width / 2,
 			y: r.top + r.height / 2,
 			colors,
 			intensity: this.plugin.data.confettiIntensity,
-			glowEl: glowEl ?? from,
-			ignoreReducedMotion: this.plugin.data.confettiIgnoreReducedMotion,
 		});
 	}
 

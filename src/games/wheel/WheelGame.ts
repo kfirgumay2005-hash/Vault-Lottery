@@ -158,12 +158,12 @@ export class WheelGame implements Game {
 		void this.wheel.spin(winner, this.data.spinDurationSec * 1000).then(() => {
 			if (!this.alive) return;
 			const s = slices[winner];
-			this.ctx.audio.gameEnd();
+			this.ctx.audio.gameEnd(s.sound);
 			this.showResult(s.label || `Slice ${winner + 1}`, s.color);
 			this.setBusy(false);
 			this.ctx.announce(`Result: ${s.label}`);
 			if (this.data.confetti && this.wheel) {
-				this.ctx.celebrate(this.wheel.canvas, [s.color], this.resultEl);
+				this.ctx.celebrate(this.wheel.canvas, [s.color]);
 			}
 		});
 	}

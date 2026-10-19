@@ -24,7 +24,7 @@ function fileName(path: string | null): string {
 }
 
 /** Copies a file from the computer / device into the vault's attachment folder. Returns its vault path. */
-async function addDeviceFile(plugin: VaultLotteryPlugin, accept: string): Promise<string | null> {
+export async function addDeviceFile(plugin: VaultLotteryPlugin, accept: string): Promise<string | null> {
 	const f = await pickDeviceFile(accept);
 	if (!f) return null;
 	const notice = f.size > 5_000_000 ? new Notice("Copying the file…", 0) : null;

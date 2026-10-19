@@ -5,7 +5,6 @@ import type { Game, GameContext } from "../Game";
 import type { Person, Roster } from "../../settings";
 import { TEAM_COLOR_NAMES } from "../../shared/color";
 import { buildTickOverride, soundAppearanceSection } from "../../shared/appearance";
-import { prefersReducedMotion } from "../../shared/Confetti";
 import { copyText, createUniqueNote, timestamp } from "../../shared/insertResult";
 import { pickFolder } from "../../shared/modals";
 import { uid } from "../../shared/random";
@@ -100,7 +99,6 @@ export class TeamPickerGame implements Game {
 				if (this.result?.kind === "teams" && this.result.teams[i]) this.result.teams[i].color = c;
 			},
 			tick: () => this.ctx.audio.tick(this.d.tickSoundOverride),
-			reducedMotion: () => prefersReducedMotion() && !this.ctx.plugin.data.confettiIgnoreReducedMotion,
 		});
 		this.actionsEl = container.createDiv({ cls: "vault-lottery-result-actions" });
 		this.renderActions();
@@ -338,7 +336,7 @@ export class TeamPickerGame implements Game {
 		if (!this.d.instant) this.ctx.audio.gameEnd();
 		this.setBusy(false);
 		this.renderActions();
-		if (this.d.confetti && confettiFrom) this.ctx.celebrate(confettiFrom, colors, confettiFrom);
+		if (this.d.confetti && confettiFrom) this.ctx.celebrate(confettiFrom, colors);
 	}
 
 	private async makeTeams(people: Person[]): Promise<void> {

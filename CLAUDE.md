@@ -29,7 +29,7 @@ Repo: https://github.com/kfirgumay2005-hash/Vault-Lottery (MIT).
 
 ## Product decisions (the user's, keep them)
 
-- **Settings tab = neutral options only**: General (game on open, confetti intensity / reduced motion), Media, Data.
+- **Settings tab = neutral options only**: General (game on open, confetti intensity), Media, Data.
   Every game-specific option, the sounds and the background live inside the game's own window. Don't add game
   settings to the settings tab.
 - **Each game has its own background** (`data.<game>.background`): none / color / image / looping muted video.
@@ -52,7 +52,8 @@ Repo: https://github.com/kfirgumay2005-hash/Vault-Lottery (MIT).
   sidebar leaf.
 - Audio: built-in ticks and dice/coin sounds are synthesized (Web Audio, no shipped files), ticks throttled to ~25ms.
   Spin music pauses menu music, which resumes after the end sound; menu music only plays while the view is visible.
-- Confetti stays inside the view and respects `prefers-reduced-motion` (glow instead) unless overridden.
+- Confetti stays inside the view and always shows: the user removed the reduced-motion fallback (glow) and its
+  setting; don't bring them back.
 - Obsidian guidelines: no `innerHTML` with user content (`createEl`), classes prefixed `vault-lottery-`, clean up
   frames / audio / observers / listeners (`registerEvent`, `unmount`, `onClose`).
 - Unit tests cover `random.ts`, `DiceNotation.ts`, `TeamSplitter.ts` and the settings helpers.

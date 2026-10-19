@@ -11,9 +11,6 @@ export interface ConfettiOptions {
 	y: number;
 	colors?: string[];
 	intensity: Intensity;
-	/** Element that gets a short glow instead, when reduced motion applies. */
-	glowEl?: HTMLElement | null;
-	ignoreReducedMotion: boolean;
 }
 
 interface Particle {
@@ -34,32 +31,18 @@ interface Particle {
 }
 
 const COUNTS: Record<Intensity, number> = { low: 80, medium: 140, high: 200 };
-const DURATION = 2.5;
-
-export function prefersReducedMotion(): boolean {
-	try {
-		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	} catch {
-		return false;
-	}
-}
+const DURATION = 3.2;
 
 export class Confetti {
 	private canvas: HTMLCanvasElement | null = null;
 	private particles: Particle[] = [];
 	private frame: number | null = null;
 	private last = 0;
-	private glowTimer: number | null = null;
-	private glowEl: HTMLElement | null = null;
 
 	constructor(private host: HTMLElement, private accent: () => string) {}
 
 	fire(o: ConfettiOptions): void {
 		this.cancel();
-		if (prefersReducedMotion() && !o.ignoreReducedMotion) {
-			this.glow(o.glowEl ?? null);
-			return;
-		}
 		const rect = this.host.getBoundingClientRect();
 		if (rect.width < 2 || rect.height < 2) return;
 		const dpr = window.devicePixelRatio || 1;
@@ -68,8 +51,9 @@ export class Confetti {
 		canvas.height = Math.round(rect.height * dpr);
 		this.canvas = canvas;
 
-		const ox = o.x - rect.left;
-		const oy = o.y - rect.top;
+		// An origin scrolled out of sight (the wheel above the result) would hide the whole burst: keep it in view.
+		const ox = Math.max(rect.width * 0.1, Math.min(rect.width * 0.9, o.x - rect.left));
+		const oy = Math.max(rect.height * 0.3, Math.min(rect.height * 0.9, o.y - rect.top));
 		const palette = [this.accent(), ...(o.colors ?? []), ...FESTIVE];
 		const n = COUNTS[o.intensity] ?? COUNTS.medium;
 		const scale = Math.max(0.7, Math.min(1.4, rect.width / 320));
@@ -77,7 +61,7 @@ export class Confetti {
 			const angle = -Math.PI / 2 + randomRange(-0.65, 0.65);
 			const speed = randomRange(260, 680) * scale;
 			const shape = randomFloat() < 0.55 ? 0 : randomFloat() < 0.6 ? 1 : 2;
-			const size = randomRange(4, 8);
+			const size = randomRange(6, 11) * Math.min(1.2, scale);
 			this.particles.push({
 				x: ox + randomRange(-8, 8),
 				y: oy + randomRange(-6, 6),
@@ -156,26 +140,11 @@ export class Confetti {
 		ctx.globalAlpha = 1;
 	}
 
-	private glow(el: HTMLElement | null): void {
-		if (!el) return;
-		this.glowEl = el;
-		el.addClass("vault-lottery-glow");
-		this.glowTimer = window.setTimeout(() => {
-			el.removeClass("vault-lottery-glow");
-			this.glowTimer = null;
-			this.glowEl = null;
-		}, 1200);
-	}
-
 	cancel(): void {
 		if (this.frame !== null) window.cancelAnimationFrame(this.frame);
 		this.frame = null;
 		this.particles = [];
 		this.canvas?.remove();
 		this.canvas = null;
-		if (this.glowTimer !== null) window.clearTimeout(this.glowTimer);
-		this.glowTimer = null;
-		this.glowEl?.removeClass("vault-lottery-glow");
-		this.glowEl = null;
 	}
 }

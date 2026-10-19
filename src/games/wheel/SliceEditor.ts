@@ -1,10 +1,13 @@
-// Slice editor: label, color / image fill, text color, glow and size, reorder, delete.
+// Slice editor: label, color / image fill, text color, glow and size, own end sound, reorder, delete.
 
-import { setIcon, setTooltip } from "obsidian";
+import { Menu, Platform, setIcon, setTooltip } from "obsidian";
 import { cropImage, wedgeAspect } from "../../images/CropModal";
 import type VaultLotteryPlugin from "../../main";
 import { makeSlice, type ImageRef, type Slice } from "../../settings";
+import { AUDIO_EXTENSIONS } from "../../shared/AudioManager";
+import { addDeviceFile } from "../../shared/appearance";
 import { SLICE_PALETTE, contrastText } from "../../shared/color";
+import { pickFile } from "../../shared/modals";
 import { iconButton, setDisabled } from "../../shared/ui";
 
 export const MIN_SLICES = 2;
@@ -159,6 +162,15 @@ export class SliceEditor {
 			sizeTip();
 			this.onChange(false);
 		});
+		const soundName = s.sound?.split("/").pop();
+		const sound = iconButton(
+			line2,
+			"music",
+			s.sound ? `Sound when this slice wins: ${soundName} (instead of the end sound)` : "Sound when this slice wins",
+			() => this.soundMenu(s, sound),
+			s.sound ? "is-active" : "",
+		);
+		sound.setAttr("aria-haspopup", "menu");
 		line2.createDiv({ cls: "vault-lottery-spacer", attr: { "aria-hidden": "true" } });
 		iconButton(line2, "trash-2", "Delete slice", () => this.remove(i), "vault-lottery-danger");
 	}
@@ -179,6 +191,46 @@ export class SliceEditor {
 		this.onChange(true);
 		this.plugin.releaseImage(old);
 		this.render();
+	}
+
+	/** Choose, preview or clear the slice's own sound (it replaces the end sound when the slice wins). */
+	private soundMenu(s: Slice, anchor: HTMLElement): void {
+		const use = (path: string) => {
+			const old = s.sound;
+			s.sound = path;
+			this.onChange(false);
+			if (old) this.plugin.scheduleMediaGc();
+			this.render();
+		};
+		const menu = new Menu();
+		menu.addItem((it) =>
+			it.setTitle("Sound from vault…").setIcon("folder-open").onClick(async () => {
+				const f = await pickFile(this.plugin.app, AUDIO_EXTENSIONS, "Choose an audio file (mp3, wav, ogg, m4a, flac)…");
+				if (f) use(f.path);
+			}),
+		);
+		menu.addItem((it) =>
+			it.setTitle(Platform.isMobile ? "Sound from device…" : "Sound from computer…").setIcon("upload").onClick(async () => {
+				const path = await addDeviceFile(this.plugin, "audio/*,.mp3,.wav,.ogg,.m4a,.flac");
+				if (path) use(path);
+			}),
+		);
+		if (s.sound) {
+			const path = s.sound;
+			menu.addSeparator();
+			menu.addItem((it) => it.setTitle("Preview").setIcon("play").onClick(() => this.plugin.audio.previewFile(path)));
+			menu.addItem((it) =>
+				it.setTitle("Remove sound (use the end sound)").setIcon("x").onClick(() => {
+					this.plugin.audio.stopPreview();
+					delete s.sound;
+					this.onChange(false);
+					this.plugin.scheduleMediaGc();
+					this.render();
+				}),
+			);
+		}
+		const r = anchor.getBoundingClientRect();
+		menu.showAtPosition({ x: r.left, y: r.bottom });
 	}
 
 	/** Back to a color fill, and let the image file go. */
@@ -213,6 +265,7 @@ export class SliceEditor {
 		const [removed] = this.slices.splice(i, 1);
 		this.onChange(true);
 		this.plugin.releaseImage(removed?.image);
+		if (removed?.sound) this.plugin.scheduleMediaGc();
 		this.render();
 	}
 

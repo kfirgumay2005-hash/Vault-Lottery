@@ -16,7 +16,6 @@ export interface TeamBoardOptions {
 	onMove: (personId: string, from: number, to: number) => void;
 	onColor: (team: number, color: string) => void;
 	tick: () => void;
-	reducedMotion: () => boolean;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -102,26 +101,23 @@ export class TeamBoard {
 		for (const p of shuffle(all)) chips.set(p.id, this.personChip(deck, p));
 		const bodies = this.columns(teams, true);
 		const metas = Array.from(this.el.querySelectorAll<HTMLElement>(".vault-lottery-team-meta"));
-		const reduced = this.o.reducedMotion();
 
 		// 1) Shuffle: chips jitter and swap for ~0.6 s
-		if (!reduced) {
-			const t0 = performance.now();
-			while (performance.now() - t0 < 600) {
-				if (run !== this.run) return;
-				for (const c of chips.values()) {
-					c.animate(
-						[{ transform: "translate(0,0)" }, { transform: `translate(${randomRange(-6, 6)}px, ${randomRange(-5, 5)}px) rotate(${randomRange(-6, 6)}deg)` }, { transform: "translate(0,0)" }],
-						{ duration: 150, easing: "ease-in-out" },
-					);
-				}
-				const kids = Array.from(deck.children);
-				if (kids.length > 1) {
-					const a = pick(kids);
-					deck.insertBefore(a, kids[randomInt(0, kids.length - 1)]);
-				}
-				await sleep(150);
+		const t0 = performance.now();
+		while (performance.now() - t0 < 600) {
+			if (run !== this.run) return;
+			for (const c of chips.values()) {
+				c.animate(
+					[{ transform: "translate(0,0)" }, { transform: `translate(${randomRange(-6, 6)}px, ${randomRange(-5, 5)}px) rotate(${randomRange(-6, 6)}deg)` }, { transform: "translate(0,0)" }],
+					{ duration: 150, easing: "ease-in-out" },
+				);
 			}
+			const kids = Array.from(deck.children);
+			if (kids.length > 1) {
+				const a = pick(kids);
+				deck.insertBefore(a, kids[randomInt(0, kids.length - 1)]);
+			}
+			await sleep(150);
 		}
 		if (run !== this.run) return;
 
@@ -137,7 +133,7 @@ export class TeamBoard {
 			const src = chips.get(p.id);
 			const target = this.personChip(bodies[team], p);
 			target.addClass("is-incoming");
-			if (src && !reduced) {
+			if (src) {
 				const b = boardRect();
 				const s = src.getBoundingClientRect();
 				const d = target.getBoundingClientRect();
@@ -156,7 +152,6 @@ export class TeamBoard {
 					target.removeClass("is-incoming");
 				}).catch(() => fly.remove());
 			} else {
-				src?.addClass("is-gone");
 				target.removeClass("is-incoming");
 			}
 			counts[team]++;
@@ -234,7 +229,7 @@ export class TeamBoard {
 		this.el.empty();
 		const box = this.el.createDiv({ cls: "vault-lottery-pick-box" });
 		const name = box.createDiv({ cls: "vault-lottery-pick-name", attr: { dir: "auto" } });
-		if (instant || this.o.reducedMotion()) {
+		if (instant) {
 			name.setText(winner.name);
 			box.addClass("is-win");
 			return box;
@@ -282,10 +277,10 @@ export class TeamBoard {
 		const items = list.map((p) => {
 			const li = ol.createEl("li", { attr: { dir: "auto" } });
 			li.createSpan({ text: p.name });
-			if (!instant && !this.o.reducedMotion()) li.addClass("is-hidden");
+			if (!instant) li.addClass("is-hidden");
 			return li;
 		});
-		if (instant || this.o.reducedMotion()) return;
+		if (instant) return;
 		const per = Math.max(80, Math.min(320, 4000 / Math.max(1, list.length)));
 		for (const li of items) {
 			if (run !== this.run) return;

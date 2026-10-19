@@ -36,7 +36,7 @@ export interface GameContext {
 	/** Call whenever isBusy() changes so the view can lock/unlock the game switcher. */
 	busyChanged(): void;
 	/** Fire confetti from an element's center using the plugin's intensity setting. */
-	celebrate(from: HTMLElement, colors?: string[], glowEl?: HTMLElement | null): void;
+	celebrate(from: HTMLElement, colors?: string[]): void;
 	save(): void;
 }
 

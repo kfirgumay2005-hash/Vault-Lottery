@@ -23,6 +23,8 @@ export interface Slice {
 	textGlow: number;
 	/** Label size relative to the automatic fit, 0.5 … 1.5 (1 = automatic). */
 	textScale: number;
+	/** Sound file in the vault played when this slice wins, instead of the general end sound. */
+	sound?: string;
 }
 
 export interface Preset {
@@ -197,7 +199,6 @@ export interface PluginData {
 		background: Background;
 	};
 	confettiIntensity: "low" | "medium" | "high";
-	confettiIgnoreReducedMotion: boolean;
 	audio: {
 		menuMusic: AudioSlot;
 		spinMusic: AudioSlot;
@@ -336,7 +337,6 @@ export function defaultData(): PluginData {
 			background: defaultBackground(),
 		},
 		confettiIntensity: "medium",
-		confettiIgnoreReducedMotion: false,
 		audio: {
 			menuMusic: { enabled: false, volume: 0.5, path: null },
 			spinMusic: { enabled: false, volume: 0.6, path: null },
@@ -463,6 +463,7 @@ export function normalizeData(d: PluginData): PluginData {
 	const legacy = (d as unknown as { background?: unknown }).background;
 	delete (d as unknown as { background?: unknown }).background;
 	delete (d.dice as unknown as { confettiOnCrit?: unknown }).confettiOnCrit;
+	delete (d as unknown as { confettiIgnoreReducedMotion?: unknown }).confettiIgnoreReducedMotion;
 	for (const g of games) {
 		const sec = d[g] as { background: Background };
 		if (isPlainObject(legacy)) sec.background = mergeDeep(defaultBackground(), legacy);
@@ -483,6 +484,7 @@ function normalizeSlice(s: unknown, i: number): Slice {
 	if (isPlainObject(s) && s.textGlow === undefined && m.fillType === "image") m.textGlow = 0.4;
 	m.textGlow = Number.isFinite(m.textGlow) ? Math.max(0, Math.min(1, m.textGlow)) : 0;
 	m.textScale = Number.isFinite(m.textScale) ? Math.max(0.5, Math.min(1.5, m.textScale)) : 1;
+	if (typeof m.sound !== "string" || !m.sound) delete m.sound;
 	if (m.fillType !== "image" || !m.image) m.fillType = m.fillType === "image" && m.image ? "image" : "color";
 	return m;
 }

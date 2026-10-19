@@ -160,16 +160,6 @@
 	z-index: 50;
 }
 
-.vault-lottery-glow {
-	animation: vault-lottery-glow 1.2s ease-out;
-}
-
-@keyframes vault-lottery-glow {
-	0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--interactive-accent) 70%, transparent); }
-	40% { box-shadow: 0 0 18px 6px color-mix(in srgb, var(--interactive-accent) 45%, transparent); }
-	100% { box-shadow: 0 0 0 0 transparent; }
-}
-
 .vault-lottery-locked {
 	opacity: 0.55;
 	pointer-events: none;
@@ -621,6 +611,11 @@ body .vault-lottery-hidden,
 .vault-lottery-slice-tools {
 	flex-wrap: wrap;
 	row-gap: 4px;
+}
+
+/* Slice with its own end sound */
+.vault-lottery-slice-tools .vault-lottery-icon-btn.is-active {
+	color: var(--interactive-accent);
 }
 
 /* Narrow sidebars: tighter slice rows so everything stays on two lines */
