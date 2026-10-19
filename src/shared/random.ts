@@ -4,7 +4,7 @@ const BUF = new Uint32Array(64);
 let bufPos = BUF.length;
 
 function cryptoObj(): Crypto {
-	return globalThis.crypto;
+	return window.crypto;
 }
 
 /** Uniform 32-bit unsigned integer. */
@@ -54,7 +54,7 @@ export function pick<T>(arr: readonly T[]): T {
 /** Index chosen with probability proportional to its weight (cumulative weights). */
 export function weightedIndex(weights: readonly number[]): number {
 	let total = 0;
-	const cumulative: number[] = new Array(weights.length);
+	const cumulative = new Array<number>(weights.length);
 	for (let i = 0; i < weights.length; i++) {
 		const w = weights[i];
 		total += Number.isFinite(w) && w > 0 ? w : 0;

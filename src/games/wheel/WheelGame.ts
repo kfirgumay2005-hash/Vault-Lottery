@@ -65,7 +65,7 @@ export class WheelGame implements Game {
 
 		const appearance = soundAppearanceSection(container, this.ctx.plugin, "wheel", (el) => {
 			new Setting(el).setName("Spin duration").setDesc("Seconds").addSlider((s) =>
-				s.setLimits(2, 15, 1).setValue(this.data.spinDurationSec).setDynamicTooltip().onChange((v) => {
+				s.setLimits(2, 15, 1).setValue(this.data.spinDurationSec).onChange((v) => {
 					this.data.spinDurationSec = v;
 					this.ctx.save();
 				}),

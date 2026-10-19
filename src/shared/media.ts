@@ -7,11 +7,7 @@ import { App, TFile, normalizePath } from "obsidian";
 export async function saveAttachment(app: App, data: ArrayBuffer, name: string): Promise<TFile> {
 	const clean = name.replace(/[\\/:*?"<>|#^[\]]/g, "-").trim() || "file";
 	const source = app.workspace.getActiveFile()?.path ?? "";
-	const fm = app.fileManager as { getAvailablePathForAttachment?: (n: string, s?: string) => Promise<string> };
-	let path = typeof fm.getAvailablePathForAttachment === "function"
-		? await fm.getAvailablePathForAttachment(clean, source)
-		: normalizePath(clean);
-	path = normalizePath(path);
+	const path = normalizePath(await app.fileManager.getAvailablePathForAttachment(clean, source));
 	const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 	if (dir && !app.vault.getAbstractFileByPath(dir)) await app.vault.createFolder(dir).catch(() => undefined);
 	return app.vault.createBinary(path, data);

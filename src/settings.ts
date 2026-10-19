@@ -487,7 +487,7 @@ export function normalizeRoster(r: unknown): Roster {
 	const m = mergeDeep(emptyRoster(), r);
 	m.people = m.people
 		.filter(isPlainObject)
-		.map((p, i) => mergeDeep({ id: `p${i}`, name: "", present: true } as Person, p));
+		.map((p, i) => mergeDeep<Person>({ id: `p${i}`, name: "", present: true }, p));
 	m.keepApart = m.keepApart.filter((p) => Array.isArray(p) && p.length === 2);
 	m.keepTogether = m.keepTogether.filter((p) => Array.isArray(p) && p.length === 2);
 	return m;

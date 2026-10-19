@@ -113,7 +113,7 @@ export class ConfirmModal extends Modal {
 					this.result = true;
 					this.close();
 				});
-				if (this.danger) b.setWarning();
+				if (this.danger) b.setDestructive();
 				else b.setCta();
 			});
 	}

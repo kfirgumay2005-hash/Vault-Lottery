@@ -14,7 +14,7 @@ export class NotationPromptModal extends Modal {
 		this.contentEl.addClass("vault-lottery-modal");
 		const input = this.contentEl.createEl("input", { type: "text", cls: "vault-lottery-prompt-input", attr: { spellcheck: "false", autocapitalize: "off" } });
 		input.value = this.initial;
-		input.placeholder = "e.g. 2d6+3, d20, 4d6kh3, 2d20kl1";
+		input.placeholder = "Dice, like 2d6+3, d20, 4d6kh3 or 2d20kl1";
 		const err = this.contentEl.createDiv({ cls: "vault-lottery-error" });
 		let rollBtn: ButtonComponent | null = null;
 		const validate = () => {

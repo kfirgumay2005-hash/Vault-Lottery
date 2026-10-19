@@ -51,7 +51,6 @@
 	gap: 4px;
 	padding: 6px 8px;
 	border-bottom: 1px solid var(--background-modifier-border);
-	background: var(--background-primary);
 	background: color-mix(in srgb, var(--background-primary) 88%, transparent);
 	backdrop-filter: blur(6px);
 	flex: 0 0 auto;
@@ -178,8 +177,9 @@
 	transition: opacity 0.15s;
 }
 
-.vault-lottery-hidden {
-	display: none !important;
+body .vault-lottery-hidden,
+.vault-lottery-modal .vault-lottery-hidden {
+	display: none;
 }
 
 .vault-lottery-muted {
@@ -203,7 +203,6 @@
 
 .vault-lottery-warning {
 	color: var(--text-warning, var(--color-orange));
-	background: var(--background-secondary);
 	background: color-mix(in srgb, var(--color-orange, orange) 12%, transparent);
 	border-radius: var(--radius-s, 6px);
 	padding: 6px 8px;
@@ -342,7 +341,6 @@
 .vault-lottery-section {
 	border: 1px solid var(--background-modifier-border);
 	border-radius: var(--vl-radius);
-	background: var(--background-primary);
 	background: color-mix(in srgb, var(--background-primary) 82%, transparent);
 }
 
@@ -420,13 +418,11 @@
 	max-width: 180px;
 }
 
-.vault-lottery-subsetting {
-	border-top: none !important;
-	padding-top: 0 !important;
-}
-
-.vault-lottery-settings .vault-lottery-subsetting {
-	padding-left: 18px;
+/* A follow-up row of the setting above it (Obsidian gives every setting row a top border and padding) */
+.vault-lottery-view .setting-item.vault-lottery-subsetting,
+.vault-lottery-modal .setting-item.vault-lottery-subsetting {
+	border-top: none;
+	padding-top: 0;
 }
 
 .vault-lottery-subsetting .setting-item-control button {
@@ -693,12 +689,12 @@
 }
 
 /* The glow slider takes the free space in the row, so the delete button stays on the same line */
-.vault-lottery-text-color:has(.vault-lottery-glow) {
+.vault-lottery-text-color.has-glow-slider {
 	flex: 1 1 96px;
 	min-width: 0;
 }
 
-.vault-lottery-glow {
+.vault-lottery-glow-slider {
 	flex: 1 1 40px;
 	width: 40px;
 	min-width: 36px;
@@ -706,7 +702,7 @@
 	margin-left: 4px;
 }
 
-.is-mobile .vault-lottery-glow {
+.is-mobile .vault-lottery-glow-slider {
 	height: 28px;
 }
 
@@ -805,9 +801,7 @@
 	max-width: 100%;
 	padding: 1px 2px 1px 8px;
 	border-radius: 999px;
-	background: var(--background-secondary);
 	background: color-mix(in srgb, var(--vl-chip-color, var(--interactive-accent)) 16%, var(--background-secondary));
-	border: 1px solid var(--background-modifier-border);
 	border: 1px solid color-mix(in srgb, var(--vl-chip-color, var(--interactive-accent)) 35%, transparent);
 	font-size: var(--font-ui-small);
 }
@@ -858,7 +852,6 @@
 	padding: 8px 18px;
 	border-radius: 14px;
 	cursor: pointer;
-	background: var(--background-secondary);
 	background:
 		linear-gradient(180deg,
 			color-mix(in srgb, var(--text-faint) 30%, var(--background-secondary)) 0%,
@@ -1149,7 +1142,6 @@
 .vault-lottery-stage {
 	position: relative;
 	border-radius: var(--vl-radius);
-	background: var(--background-secondary);
 	background:
 		radial-gradient(ellipse at 50% 120%, color-mix(in srgb, var(--interactive-accent) 12%, transparent), transparent 70%),
 		var(--background-secondary);
@@ -1518,7 +1510,6 @@
 	padding: 3px 10px;
 	border-radius: 999px;
 	background: var(--background-primary);
-	border: 1px solid var(--background-modifier-border);
 	border: 1px solid color-mix(in srgb, var(--vl-chip-color, var(--vl-team-color, var(--interactive-accent))) 55%, var(--background-modifier-border));
 	font-size: var(--font-ui-small);
 	overflow: hidden;
@@ -1758,14 +1749,6 @@
 	background: transparent;
 }
 
-.vault-lottery-settings-note {
-	padding: 0 0 12px;
-}
-
-.vault-lottery-settings-chips {
-	padding: 0 0 12px;
-}
-
 /* ---------- Mobile ---------- */
 
 .is-mobile .vault-lottery-view.view-content {
@@ -1879,13 +1862,15 @@
 	flex-basis: 100%;
 }
 
+/* Same selectors as the animations above, later in the file, so these win */
 @media (prefers-reduced-motion: reduce) {
-	.vault-lottery-result-text,
+	.vault-lottery-result.is-pop .vault-lottery-result-text,
 	.vault-lottery-result-card.is-pop,
-	.vault-lottery-pick-name,
+	.vault-lottery-pick-name.is-flash,
+	.vault-lottery-pick-box.is-win .vault-lottery-pick-name,
 	.vault-lottery-order li.is-revealed,
 	.vault-lottery-crit {
-		animation: none !important;
+		animation: none;
 	}
 }
 

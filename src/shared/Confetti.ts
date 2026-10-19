@@ -76,7 +76,7 @@ export class Confetti {
 		for (let i = 0; i < n; i++) {
 			const angle = -Math.PI / 2 + randomRange(-0.65, 0.65);
 			const speed = randomRange(260, 680) * scale;
-			const shape = (randomFloat() < 0.55 ? 0 : randomFloat() < 0.6 ? 1 : 2) as 0 | 1 | 2;
+			const shape = randomFloat() < 0.55 ? 0 : randomFloat() < 0.6 ? 1 : 2;
 			const size = randomRange(4, 8);
 			this.particles.push({
 				x: ox + randomRange(-8, 8),

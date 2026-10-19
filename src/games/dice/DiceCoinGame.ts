@@ -272,7 +272,7 @@ export class DiceCoinGame implements Game {
 			}),
 		);
 		new Setting(body).setName("Flip duration").setDesc("Seconds").addSlider((sl) =>
-			sl.setLimits(0.5, 4, 0.1).setValue(c.durationSec).setDynamicTooltip().onChange((v) => {
+			sl.setLimits(0.5, 4, 0.1).setValue(c.durationSec).onChange((v) => {
 				c.durationSec = v;
 				this.ctx.save();
 			}),
@@ -364,7 +364,7 @@ export class DiceCoinGame implements Game {
 		}
 		const row = this.toolsEl.createDiv({ cls: "vault-lottery-notation-row" });
 		this.notationInput = row.createEl("input", { type: "text", cls: "vault-lottery-notation", attr: { "aria-label": "Dice notation", spellcheck: "false", autocapitalize: "off", autocomplete: "off" } });
-		this.notationInput.placeholder = "e.g. 2d6+3, 4d6kh3";
+		this.notationInput.placeholder = "Dice, like 2d6+3 or 4d6kh3";
 		this.notationInput.addEventListener("input", () => this.setNotation(this.notationInput?.value ?? "", true, false));
 		this.notationInput.addEventListener("keydown", (e: KeyboardEvent) => {
 			if (e.key === "Enter" && !e.isComposing) {
@@ -596,7 +596,7 @@ export class DiceCoinGame implements Game {
 		});
 
 		new Setting(body).setName("Roll duration").setDesc("Seconds").addSlider((sl) =>
-			sl.setLimits(0.3, 4, 0.1).setValue(dd.durationSec).setDynamicTooltip().onChange((v) => {
+			sl.setLimits(0.3, 4, 0.1).setValue(dd.durationSec).onChange((v) => {
 				dd.durationSec = v;
 				this.ctx.save();
 			}),
@@ -683,7 +683,7 @@ export class DiceCoinGame implements Game {
 			this.ctx.save();
 		}));
 		new Setting(body).setClass("vault-lottery-subsetting")
-			.addSlider((sl) => sl.setLimits(0, 100, 1).setValue(Math.round(this.d.soundsVolume * 100)).setDynamicTooltip().onChange((v) => {
+			.addSlider((sl) => sl.setLimits(0, 100, 1).setValue(Math.round(this.d.soundsVolume * 100)).onChange((v) => {
 				this.d.soundsVolume = v / 100;
 				this.ctx.save();
 			}))

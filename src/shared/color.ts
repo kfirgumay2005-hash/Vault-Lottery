@@ -64,13 +64,14 @@ export function cssToHex(color: string, fallback = "#7c3aed"): string {
 	const c = color.trim();
 	if (parseHex(c)) return c.startsWith("#") ? c : `#${c}`;
 	try {
-		const cv = document.createElement("canvas");
+		const cv = createEl("canvas");
 		cv.width = cv.height = 1;
 		const ctx = cv.getContext("2d");
 		if (!ctx) return fallback;
 		ctx.fillStyle = "#000";
 		ctx.fillStyle = c;
-		const v = ctx.fillStyle as string;
+		const v = ctx.fillStyle;
+		if (typeof v !== "string") return fallback;
 		if (v.startsWith("#")) return v;
 		const m = v.match(/rgba?\(([^)]+)\)/);
 		if (m) {
@@ -87,10 +88,8 @@ export function cssToHex(color: string, fallback = "#7c3aed"): string {
 export function themeColor(el: HTMLElement, name: string, fallback: string): string {
 	if (!getComputedStyle(el).getPropertyValue(name).trim()) return fallback;
 	// Let the browser resolve var()/calc()/hsl() by computing a real `color` property.
-	const probe = el.ownerDocument.createElement("span");
-	probe.style.display = "none";
-	probe.style.color = `var(${name})`;
-	el.appendChild(probe);
+	const probe = el.createSpan();
+	probe.setCssStyles({ display: "none", color: `var(${name})` });
 	const v = getComputedStyle(probe).color;
 	probe.remove();
 	return v ? cssToHex(v, fallback) : fallback;

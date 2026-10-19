@@ -357,7 +357,7 @@ export default class VaultLotteryPlugin extends Plugin {
 	// ---------- Commands ----------
 
 	private registerCommands(): void {
-		this.addCommand({ id: "open", name: "Open Vault Lottery", callback: () => void this.activateView() });
+		this.addCommand({ id: "open", name: "Open", callback: () => void this.activateView() });
 		this.addCommand({ id: "open-wheel", name: "Open Spin Wheel", callback: () => void this.activateView("wheel") });
 		this.addCommand({ id: "open-notes", name: "Open Note Lottery", callback: () => void this.activateView("notes") });
 		this.addCommand({ id: "open-dice", name: "Open Dice & Coin", callback: () => void this.activateView("dice") });
@@ -461,7 +461,7 @@ export default class VaultLotteryPlugin extends Plugin {
 		});
 		this.addCommand({
 			id: "dice-insert-roll",
-			name: "Dice & Coin: Insert roll result at cursor",
+			name: "Dice & Coin: Insert roll result into the note",
 			editorCallback: (editor) => {
 				const r = rollText(this.data);
 				if ("error" in r) {
@@ -477,7 +477,7 @@ export default class VaultLotteryPlugin extends Plugin {
 		});
 		this.addCommand({
 			id: "dice-insert-flip",
-			name: "Dice & Coin: Insert coin flip at cursor",
+			name: "Dice & Coin: Insert coin flip into the note",
 			editorCallback: (editor) => {
 				const text = coinText(this.data, flipSeries(this.data.dice.coin.bestOf));
 				insertAtCursor(editor, `Coin → ${text}`);

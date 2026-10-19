@@ -116,7 +116,7 @@ export class SliceEditor {
 		} else {
 			iconButton(line2, "image-plus", "Choose another image", () => void this.chooseImage(s));
 		}
-		const textWrap = line2.createDiv({ cls: "vault-lottery-text-color" });
+		const textWrap = line2.createDiv({ cls: "vault-lottery-text-color has-glow-slider" });
 		const tIcon = textWrap.createSpan({ cls: "vault-lottery-text-color-icon" });
 		setIcon(tIcon, "type");
 		const text = textWrap.createEl("input", { type: "color", cls: "vault-lottery-color" });
@@ -127,7 +127,7 @@ export class SliceEditor {
 			s.textColor = text.value;
 			this.onChange(false);
 		});
-		const glow = textWrap.createEl("input", { type: "range", cls: "vault-lottery-glow", attr: { "aria-label": "Text glow" } });
+		const glow = textWrap.createEl("input", { type: "range", cls: "vault-lottery-glow-slider", attr: { "aria-label": "Text glow" } });
 		glow.min = "0";
 		glow.max = "100";
 		glow.step = "1";

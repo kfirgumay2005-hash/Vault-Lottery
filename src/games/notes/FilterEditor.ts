@@ -39,9 +39,9 @@ export class FilterEditor {
 
 	render(): void {
 		this.el.empty();
-		this.listRule("includeFolders", "Include folders", "Whole vault", this.f.includeFolders, () => this.addFolder(this.f.includeFolders), "folder");
-		this.listRule("excludeFolders", "Exclude folders", "None", this.f.excludeFolders, () => this.addFolder(this.f.excludeFolders), "folder");
-		this.listRule("includeTags", "Include tags", "Any note", this.f.includeTags, () => this.addTag(this.f.includeTags), "tag", (row) => {
+		this.listRule("includeFolders", "Include folders", "Whole vault", this.f.includeFolders, () => void this.addFolder(this.f.includeFolders), "folder");
+		this.listRule("excludeFolders", "Exclude folders", "None", this.f.excludeFolders, () => void this.addFolder(this.f.excludeFolders), "folder");
+		this.listRule("includeTags", "Include tags", "Any note", this.f.includeTags, () => void this.addTag(this.f.includeTags), "tag", (row) => {
 			const sel = row.createEl("select", { cls: "dropdown vault-lottery-small-select", attr: { "aria-label": "Tag match mode" } });
 			sel.createEl("option", { text: "Any of", value: "any" });
 			sel.createEl("option", { text: "All of", value: "all" });
@@ -51,7 +51,7 @@ export class FilterEditor {
 				this.changed();
 			});
 		});
-		this.listRule("excludeTags", "Exclude tags", "None", this.f.excludeTags, () => this.addTag(this.f.excludeTags), "tag");
+		this.listRule("excludeTags", "Exclude tags", "None", this.f.excludeTags, () => void this.addTag(this.f.excludeTags), "tag");
 		this.propertyRule();
 		this.dateRule("modified", "Modified");
 		this.dateRule("created", "Created");
@@ -208,8 +208,8 @@ export class FilterEditor {
 		const cur = this.f[rule];
 		const row = body.createDiv({ cls: "vault-lottery-inline-fields" });
 		const op = row.createEl("select", { cls: "dropdown" });
-		op.createEl("option", { text: "within the last", value: "within" });
-		op.createEl("option", { text: "more than", value: "older-than" });
+		op.createEl("option", { text: "Within the last", value: "within" });
+		op.createEl("option", { text: "More than", value: "older-than" });
 		op.value = cur?.op ?? "within";
 		const days = row.createEl("input", { type: "number", cls: "vault-lottery-number", placeholder: "—" });
 		days.min = "0";

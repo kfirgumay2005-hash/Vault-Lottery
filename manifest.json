@@ -1,8 +1,8 @@
 {
   "id": "vaultlottery",
   "name": "Vault Lottery",
-  "version": "1.0.0",
-  "minAppVersion": "1.5.0",
+  "version": "1.0.1",
+  "minAppVersion": "1.13.0",
   "description": "Randomizer games in the right sidebar: spin wheel, note lottery, dice & coin, and team picker.",
   "author": "KfirG",
   "authorUrl": "https://github.com/kfirgumay2005-hash",

@@ -193,12 +193,9 @@ export class AudioManager {
 	}
 
 	private safePlay(el: HTMLAudioElement, onBlocked?: () => void): void {
-		const p = el.play();
-		if (p && typeof p.catch === "function") {
-			p.catch((e: unknown) => {
-				if ((e as DOMException)?.name === "NotAllowedError") onBlocked?.();
-			});
-		}
+		el.play().catch((e: unknown) => {
+			if ((e as DOMException)?.name === "NotAllowedError") onBlocked?.();
+		});
 	}
 
 	/** View open & visible → menu music may play. */

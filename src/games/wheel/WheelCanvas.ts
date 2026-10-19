@@ -108,7 +108,7 @@ export class WheelCanvas {
 		if (R <= 4) return null;
 		const dpr = window.devicePixelRatio || 1;
 		const size = Math.ceil((R * 2 + 4) * dpr);
-		const c = document.createElement("canvas");
+		const c = createEl("canvas");
 		c.width = size;
 		c.height = size;
 		const ctx = c.getContext("2d");

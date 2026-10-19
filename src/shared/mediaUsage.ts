@@ -104,15 +104,10 @@ export function filesIn(folder: TFolder): TFile[] {
 }
 
 /**
- * Removes a file: to the trash the way the user set it up (system trash or .trash), or for good when
- * `permanent` (frees the space right away).
+ * Removes a file: to the trash the way the user set it up (system trash or .trash), or — when the user chose
+ * "Delete permanently" in the plugin settings — straight off the disk to free the space.
  */
 export async function removeFile(app: App, file: TFile, permanent: boolean): Promise<void> {
-	if (permanent) {
-		await app.vault.delete(file, true);
-		return;
-	}
-	const fm = app.fileManager as { trashFile?: (f: TFile) => Promise<void> };
-	if (typeof fm.trashFile === "function") await fm.trashFile(file);
-	else await app.vault.trash(file, true);
+	if (permanent) await app.vault.adapter.remove(file.path);
+	else await app.fileManager.trashFile(file);
 }

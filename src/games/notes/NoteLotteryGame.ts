@@ -94,7 +94,7 @@ export class NoteLotteryGame implements Game {
 
 		const appearance = soundAppearanceSection(container, this.ctx.plugin, "notes", (el) => {
 			new Setting(el).setName("Draw duration").setDesc("Seconds").addSlider((s) =>
-				s.setLimits(2, 15, 1).setValue(this.d.drawDurationSec).setDynamicTooltip().onChange((v) => {
+				s.setLimits(2, 15, 1).setValue(this.d.drawDurationSec).onChange((v) => {
 					this.d.drawDurationSec = v;
 					this.ctx.save();
 				}),
@@ -133,7 +133,7 @@ export class NoteLotteryGame implements Game {
 			}) },
 		);
 
-		this.recount();
+		void this.recount();
 	}
 
 	unmount(): void {
@@ -169,8 +169,8 @@ export class NoteLotteryGame implements Game {
 				this.d.selectionMode = v as "uniform";
 				this.ctx.save();
 			}));
-		new Setting(el).setName("Avoid the last N picks").setDesc("Recent picks are skipped when other notes are available (0–50).").addSlider((s) =>
-			s.setLimits(0, 50, 1).setValue(this.d.avoidLastN).setDynamicTooltip().onChange((v) => {
+		new Setting(el).setName("Skip recent picks").setDesc("How many of the most recent picks to skip while other notes are available (0–50).").addSlider((s) =>
+			s.setLimits(0, 50, 1).setValue(this.d.avoidLastN).onChange((v) => {
 				this.d.avoidLastN = v;
 				this.ctx.save();
 			}),
@@ -208,7 +208,7 @@ export class NoteLotteryGame implements Game {
 		if (this.recountTimer !== null) window.clearTimeout(this.recountTimer);
 		this.recountTimer = window.setTimeout(() => {
 			this.recountTimer = null;
-			this.recount();
+			void this.recount();
 		}, 250);
 	}
 

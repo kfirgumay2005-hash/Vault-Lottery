@@ -38,7 +38,8 @@ function propertyValues(v: unknown): string[] {
 	if (v === null || v === undefined) return [];
 	if (Array.isArray(v)) return v.flatMap(propertyValues);
 	if (typeof v === "object") return [JSON.stringify(v)];
-	return [String(v)];
+	if (typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "bigint") return [String(v)];
+	return [];
 }
 
 export interface MatchContext {

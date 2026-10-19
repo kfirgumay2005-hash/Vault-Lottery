@@ -19,7 +19,7 @@ Other commands:
 | Note Lottery: Draw a note / Draw with filter… | Draw with the reel |
 | Note Lottery: Open random note (no animation) | Opens a random note from the current filter right away |
 | Dice & Coin: Flip a coin / Roll dice / Roll… | Shows the result in a notice (it animates instead when the view shows Dice & Coin) |
-| Dice & Coin: Insert roll result / coin flip at cursor | Inserts e.g. `2d6+3 → 12 (4 + 5 + 3)` or `Coin → Yes` |
+| Dice & Coin: Insert roll result / coin flip into the note | Inserts e.g. `2d6+3 → 12 (4 + 5 + 3)` or `Coin → Yes` |
 | Team Picker: Make teams / Load roster… / Pick one (notice) | |
 
 Keyboard (while the view has focus): `Space` / `Enter` plays the current game, `R` rerolls unheld dice.

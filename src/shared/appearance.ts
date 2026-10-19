@@ -77,7 +77,7 @@ export function buildAudioSlot(el: HTMLElement, plugin: VaultLotteryPlugin, name
 		}),
 	);
 	s2.addSlider((sl) =>
-		sl.setLimits(0, 100, 1).setValue(Math.round(slot.volume * 100)).setDynamicTooltip().onChange((v) => {
+		sl.setLimits(0, 100, 1).setValue(Math.round(slot.volume * 100)).onChange((v) => {
 			slot.volume = v / 100;
 			plugin.saveSoon();
 			plugin.audio.refresh();
@@ -85,7 +85,9 @@ export function buildAudioSlot(el: HTMLElement, plugin: VaultLotteryPlugin, name
 	);
 	s2.addExtraButton((b) => {
 		b.setIcon("play").setTooltip("Preview").onClick(() => {
-			const playing = plugin.audio.previewSlot(name, () => b.setIcon("play"));
+			const playing = plugin.audio.previewSlot(name, () => {
+				b.setIcon("play");
+			});
 			b.setIcon(playing ? "square" : "play");
 		});
 	});
@@ -122,7 +124,7 @@ export function buildTickSound(el: HTMLElement, plugin: VaultLotteryPlugin): voi
 				plugin.audio.previewTicks(t.soundId);
 			});
 		})
-		.addSlider((sl) => sl.setLimits(0, 100, 1).setValue(Math.round(t.volume * 100)).setDynamicTooltip().onChange((v) => {
+		.addSlider((sl) => sl.setLimits(0, 100, 1).setValue(Math.round(t.volume * 100)).onChange((v) => {
 			t.volume = v / 100;
 			plugin.saveSoon();
 		}))
@@ -215,7 +217,7 @@ export function buildBackground(el: HTMLElement, plugin: VaultLotteryPlugin, gam
 	}
 	if (bg.type !== "none") {
 		new Setting(el).setClass("vault-lottery-subsetting").setName("Opacity").addSlider((s) =>
-			s.setLimits(0, 100, 1).setValue(Math.round(bg.opacity * 100)).setDynamicTooltip().onChange((v) => {
+			s.setLimits(0, 100, 1).setValue(Math.round(bg.opacity * 100)).onChange((v) => {
 				bg.opacity = v / 100;
 				changed();
 			}),
@@ -250,7 +252,7 @@ export function buildBackground(el: HTMLElement, plugin: VaultLotteryPlugin, gam
 	}
 	if (bg.type === "image" || bg.type === "video") {
 		new Setting(el).setClass("vault-lottery-subsetting").setName("Blur").addSlider((s) =>
-			s.setLimits(0, 20, 1).setValue(bg.blur).setDynamicTooltip().onChange((v) => {
+			s.setLimits(0, 20, 1).setValue(bg.blur).onChange((v) => {
 				bg.blur = v;
 				changed();
 			}),
@@ -275,24 +277,6 @@ async function chooseBackgroundImage(plugin: VaultLotteryPlugin, game: GameId): 
 	plugin.releaseImage(old);
 	plugin.applyBackground();
 	return true;
-}
-
-export function buildConfettiGlobal(el: HTMLElement, plugin: VaultLotteryPlugin): void {
-	new Setting(el)
-		.setName("Confetti intensity")
-		.addDropdown((d) =>
-			d.addOptions({ low: "Low", medium: "Medium", high: "High" }).setValue(plugin.data.confettiIntensity).onChange((v) => {
-				plugin.data.confettiIntensity = v as "low" | "medium" | "high";
-				plugin.saveSoon();
-			}),
-		);
-	new Setting(el)
-		.setName("Confetti even with reduced motion")
-		.setDesc("When your system asks for reduced motion, a short glow is shown instead of confetti unless this is on.")
-		.addToggle((t) => t.setValue(plugin.data.confettiIgnoreReducedMotion).onChange((v) => {
-			plugin.data.confettiIgnoreReducedMotion = v;
-			plugin.saveSoon();
-		}));
 }
 
 /**

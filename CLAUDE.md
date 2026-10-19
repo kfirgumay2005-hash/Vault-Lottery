@@ -7,6 +7,11 @@ Repo: https://github.com/kfirgumay2005-hash/Vault-Lottery (MIT).
 ## Working here
 
 - Build / check: `npm run build` (tsc + esbuild, writes `main.js` in place). Unit tests: `npm test` (vitest, `tests/`).
+  Lint: `npm run lint` — Obsidian's review rules (`eslint-plugin-obsidianmd`); keep it at 0 problems, the community
+  review runs the same checks. Also no duplicate CSS properties, no `!important`, no `:has()` in `styles.css`.
+- `minAppVersion` is 1.13.0 (declarative settings API, `setDestructive`); don't use APIs newer than that.
+- Settings tab is declarative (`getSettingDefinitions` + `getControlValue`/`setControlValue` with dotted keys into
+  the plugin data); no `display()`.
 - The user writes in Hebrew; answer in Hebrew. All plugin UI text stays English.
 - Must work on desktop **and** mobile (`isDesktopOnly: false`): no Node/Electron APIs, pointer events (not mouse
   events) for drag, long-press as well as right-click, touch-sized targets under `.is-mobile`, and no hover-only UI.
@@ -66,4 +71,7 @@ Obsidian can be driven over CDP without touching the user's vault or profile: ge
 Then `playwright-core`'s `chromium.connectOverCDP` and `page.evaluate` (`app.plugins.enablePluginAndSave`,
 `app.commands.executeCommandById`). `app.emulateMobile(true)` + a 390×844 viewport checks the phone layout, and
 CDP `Emulation.setTouchEmulationEnabled` + `Input.dispatchTouchEvent` checks touch. Close leftover modals before
-reloading the plugin. Don't run this against the user's own vault (it syncs with LiveSync).
+reloading the plugin. The installed Obsidian may be older than `minAppVersion`: drop the official
+`obsidian-<ver>.asar` (from the obsidian-releases GitHub release, gunzipped) into the test profile folder and that
+version runs. Since 1.14 the settings open in a separate window (another CDP page with `.mod-settings`).
+The plugin id is `vaultlottery` (`app.plugins.plugins.vaultlottery`). Don't run this against the user's own vault (it syncs with LiveSync).
