@@ -3,6 +3,7 @@
 import { contrastText, shade, themeColor, themeFont } from "../../shared/color";
 import { randomInt, randomRange } from "../../shared/random";
 import { easeOutCubic, fitText, roundRect, sizeCanvas } from "../../shared/ui";
+import { setTextDirection } from "../../shared/bidi";
 
 export interface TrayDie {
 	sides: number;
@@ -275,6 +276,7 @@ export class DiceTray {
 		} else if (d.customFaces) {
 			const label = d.customFaces[value - 1] ?? "";
 			let fs = Math.round(s * 0.55);
+			setTextDirection(ctx, label);
 			ctx.font = `700 ${fs}px ${this.font}`;
 			while (fs > 8 && ctx.measureText(label).width > s * 1.7) {
 				fs--;

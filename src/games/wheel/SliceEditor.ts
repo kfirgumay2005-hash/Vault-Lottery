@@ -1,4 +1,4 @@
-// Slice editor: label, color / image fill, text color and glow, reorder, delete.
+// Slice editor: label, color / image fill, text color, glow and size, reorder, delete.
 
 import { setIcon, setTooltip } from "obsidian";
 import { cropImage, wedgeAspect } from "../../images/CropModal";
@@ -115,6 +115,7 @@ export class SliceEditor {
 			});
 		} else {
 			iconButton(line2, "image-plus", "Choose another image", () => void this.chooseImage(s));
+			iconButton(line2, "image-off", "Remove image", () => this.removeImage(s));
 		}
 		const textWrap = line2.createDiv({ cls: "vault-lottery-text-color has-glow-slider" });
 		const tIcon = textWrap.createSpan({ cls: "vault-lottery-text-color-icon" });
@@ -137,6 +138,27 @@ export class SliceEditor {
 			s.textGlow = parseInt(glow.value, 10) / 100;
 			this.onChange(false);
 		});
+		const sizeWrap = line2.createDiv({ cls: "vault-lottery-text-color has-glow-slider" });
+		const sIcon = sizeWrap.createSpan({ cls: "vault-lottery-text-color-icon" });
+		setIcon(sIcon, "a-large-small");
+		const size = sizeWrap.createEl("input", { type: "range", cls: "vault-lottery-glow-slider", attr: { "aria-label": "Text size" } });
+		size.min = "50";
+		size.max = "150";
+		size.step = "5";
+		size.value = String(Math.round((s.textScale ?? 1) * 100));
+		const sizeTip = () => setTooltip(size, `Text size: ${size.value}% (smaller fits long labels; double-click resets)`);
+		sizeTip();
+		size.addEventListener("input", () => {
+			s.textScale = parseInt(size.value, 10) / 100;
+			sizeTip();
+			this.onChange(false);
+		});
+		size.addEventListener("dblclick", () => {
+			size.value = "100";
+			s.textScale = 1;
+			sizeTip();
+			this.onChange(false);
+		});
 		line2.createDiv({ cls: "vault-lottery-spacer", attr: { "aria-hidden": "true" } });
 		iconButton(line2, "trash-2", "Delete slice", () => this.remove(i), "vault-lottery-danger");
 	}
@@ -154,6 +176,16 @@ export class SliceEditor {
 		const old: ImageRef | undefined = s.image;
 		s.image = ref;
 		s.fillType = "image";
+		this.onChange(true);
+		this.plugin.releaseImage(old);
+		this.render();
+	}
+
+	/** Back to a color fill, and let the image file go. */
+	private removeImage(s: Slice): void {
+		const old = s.image;
+		s.image = undefined;
+		s.fillType = "color";
 		this.onChange(true);
 		this.plugin.releaseImage(old);
 		this.render();

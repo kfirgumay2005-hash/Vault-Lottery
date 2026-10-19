@@ -2,6 +2,7 @@
 
 import { themeColor, themeFont } from "../../shared/color";
 import { easeInOutSine, easeOutQuart, fitText, sizeCanvas } from "../../shared/ui";
+import { setTextDirection } from "../../shared/bidi";
 
 export interface ReelEntry {
 	title: string;
@@ -157,6 +158,7 @@ export class SlotReel {
 			ctx.font = `500 13px ${this.font}`;
 			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
+			setTextDirection(ctx, this.message ?? "");
 			ctx.fillText(fitText(ctx, this.message ?? "Press Draw", maxW), w / 2, cy);
 			this.drawPayline(ctx, w, cy);
 			return;
@@ -177,6 +179,7 @@ export class SlotReel {
 			ctx.textBaseline = "alphabetic";
 			ctx.fillStyle = this.win && k === Math.round(this.pos) ? this.colors.accent : this.colors.text;
 			ctx.font = `600 15px ${this.font}`;
+			setTextDirection(ctx, e.title);
 			const title = fitText(ctx, e.title, maxW);
 			if (fast) {
 				// light motion blur: faint copies above/below
@@ -189,6 +192,7 @@ export class SlotReel {
 			if (e.folder) {
 				ctx.font = `400 11px ${this.font}`;
 				ctx.fillStyle = this.colors.muted;
+				setTextDirection(ctx, e.folder);
 				ctx.fillText(fitText(ctx, e.folder, maxW), w / 2, y + 16);
 			}
 		}

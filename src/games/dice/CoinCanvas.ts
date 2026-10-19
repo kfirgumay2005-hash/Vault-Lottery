@@ -5,6 +5,7 @@ import type { CoinFace } from "../../settings";
 import { contrastText, shade, themeFont } from "../../shared/color";
 import { randomInt } from "../../shared/random";
 import { fitText, sizeCanvas } from "../../shared/ui";
+import { setTextDirection } from "../../shared/bidi";
 import type { Side } from "./diceLogic";
 
 const STAGE_H = 200;
@@ -191,6 +192,7 @@ export class CoinCanvas {
 		const label = this.o.labels()[face] ?? "";
 		if (label) {
 			let size = Math.round(r * 0.42);
+			setTextDirection(ctx, label);
 			ctx.font = `700 ${size}px ${this.font}`;
 			while (size > 9 && ctx.measureText(label).width > r * 1.45) {
 				size--;

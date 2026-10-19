@@ -5,6 +5,7 @@ import type { Slice } from "../../settings";
 import { contrastText, themeColor, themeFont } from "../../shared/color";
 import { randomInt, randomRange } from "../../shared/random";
 import { easeOutQuart, fitText } from "../../shared/ui";
+import { setTextDirection } from "../../shared/bidi";
 
 const TAU = Math.PI * 2;
 const MAX_SIDE = 460;
@@ -16,6 +17,16 @@ export interface WheelCanvasOptions {
 	canSpin: () => boolean;
 }
 
+interface LabelSprite {
+	canvas: HTMLCanvasElement;
+	/** Size in CSS px, the glow padding, the slice's middle angle and the rim-side end of the text. */
+	w: number;
+	h: number;
+	pad: number;
+	mid: number;
+	outer: number;
+}
+
 export class WheelCanvas {
 	readonly wrap: HTMLElement;
 	readonly canvas: HTMLCanvasElement;
@@ -23,6 +34,7 @@ export class WheelCanvas {
 	private rotation = 0;
 	private highlight: number | null = null;
 	private cache: HTMLCanvasElement | null = null;
+	private labels: LabelSprite[] = [];
 	private side = 0;
 	private frame: number | null = null;
 	private spinning = false;
@@ -105,6 +117,7 @@ export class WheelCanvas {
 
 	private buildCache(): HTMLCanvasElement | null {
 		const { R } = this.geom();
+		this.labels = [];
 		if (R <= 4) return null;
 		const dpr = window.devicePixelRatio || 1;
 		const size = Math.ceil((R * 2 + 4) * dpr);
@@ -149,8 +162,12 @@ export class WheelCanvas {
 				ctx.stroke();
 			}
 		}
-		// Labels
-		for (let i = 0; i < n; i++) this.drawLabel(ctx, this.slices[i], -Math.PI / 2 + i * s + s / 2, s, R);
+		// Labels (drawn per frame, see drawLabels)
+		this.labels = [];
+		for (let i = 0; i < n; i++) {
+			const l = this.buildLabel(this.slices[i], -Math.PI / 2 + i * s + s / 2, s, R);
+			if (l) this.labels.push(l);
+		}
 		// Rim
 		ctx.beginPath();
 		ctx.arc(0, 0, R, 0, TAU);
@@ -198,42 +215,73 @@ export class WheelCanvas {
 		ctx.restore();
 	}
 
-	private drawLabel(ctx: CanvasRenderingContext2D, sl: Slice, mid: number, s: number, R: number): void {
+	/**
+	 * A slice's label drawn once into its own small canvas (glow included), so every frame can place it upright:
+	 * labels that would point left (upside down) are turned half a turn, also while spinning.
+	 */
+	private buildLabel(sl: Slice, mid: number, s: number, R: number): LabelSprite | null {
 		const label = sl.label.trim();
-		if (!label) return;
-		ctx.save();
-		ctx.rotate(mid);
+		if (!label) return null;
+		const c = createEl("canvas");
+		const ctx = c.getContext("2d");
+		if (!ctx) return null;
 		const outer = R * 0.9;
 		const inner = Math.max(R * 0.2, this.geom().hub + 6);
 		const maxLen = outer - inner;
 		// Font limited by the wedge's height near its inner part and by the radius
 		const byAngle = 2 * (inner + maxLen * 0.45) * Math.sin(Math.min(s, Math.PI) / 2) * 0.8;
-		let size = Math.floor(Math.min(R * 0.13, byAngle, 26));
+		// The slice's size setting scales the automatic size, and how far it may shrink to fit long labels
+		const scale = Math.max(0.5, Math.min(1.5, sl.textScale ?? 1));
+		let size = Math.floor(Math.min(R * 0.13, byAngle, 26) * scale);
+		const minSize = Math.max(5, Math.round(9 * scale));
 		const fontFor = (px: number) => `600 ${px}px ${this.font}`;
 		ctx.font = fontFor(size);
-		while (size > 9 && ctx.measureText(label).width > maxLen) {
+		while (size > minSize && ctx.measureText(label).width > maxLen) {
 			size -= 1;
 			ctx.font = fontFor(size);
 		}
-		size = Math.max(7, size);
+		size = Math.max(5, size);
 		ctx.font = fontFor(size);
 		const text = fitText(ctx, label, maxLen);
+		const glow = Math.max(0, Math.min(1, sl.textGlow ?? 0));
+		const pad = Math.ceil(4 + size * 0.9 * glow);
+		const w = Math.ceil(ctx.measureText(text).width) + pad * 2;
+		const h = Math.ceil(size * 1.4) + pad * 2;
+		const dpr = window.devicePixelRatio || 1;
+		// Resizing resets the context, so the text state is set after it
+		c.width = Math.ceil(w * dpr);
+		c.height = Math.ceil(h * dpr);
+		ctx.scale(dpr, dpr);
+		ctx.font = fontFor(size);
+		setTextDirection(ctx, label);
 		ctx.textAlign = "right";
 		ctx.textBaseline = "middle";
-		const color = sl.textColor || contrastText(sl.color);
-		ctx.fillStyle = color;
-		const glow = Math.max(0, Math.min(1, sl.textGlow ?? 0));
+		ctx.fillStyle = sl.textColor || contrastText(sl.color);
 		if (glow > 0) {
 			// Light halo around the letters; stronger = wider, brighter and drawn more times
-			const dpr = window.devicePixelRatio || 1;
 			ctx.shadowColor = `rgba(255,255,255,${(0.45 + 0.55 * glow).toFixed(2)})`;
 			ctx.shadowBlur = (2 + size * 0.9 * glow) * dpr;
 			const passes = 1 + Math.round(glow * 2);
-			for (let k = 0; k < passes; k++) ctx.fillText(text, outer, 0);
+			for (let k = 0; k < passes; k++) ctx.fillText(text, w - pad, h / 2);
 		} else {
-			ctx.fillText(text, outer, 0);
+			ctx.fillText(text, w - pad, h / 2);
 		}
-		ctx.restore();
+		return { canvas: c, w, h, pad, mid, outer };
+	}
+
+	/** Labels on top of the cached wheel (ctx already turned with the wheel), each kept upright. */
+	private drawLabels(ctx: CanvasRenderingContext2D): void {
+		for (const l of this.labels) {
+			const a = this.rotation + l.mid;
+			// Text runs outwards along the radius; pointing left means upside down
+			const flip = Math.cos(a) < 0;
+			ctx.save();
+			ctx.rotate(flip ? l.mid + Math.PI : l.mid);
+			// Anchored at the rim either way: normally its end, flipped its start
+			const x = flip ? -l.outer - l.pad : l.outer - (l.w - l.pad);
+			ctx.drawImage(l.canvas, x, -l.h / 2, l.w, l.h);
+			ctx.restore();
+		}
 	}
 
 	draw(): void {
@@ -259,6 +307,7 @@ export class WheelCanvas {
 		ctx.translate(cx, cy);
 		ctx.rotate(this.rotation);
 		if (this.cache) ctx.drawImage(this.cache, -(R + 2), -(R + 2), (R + 2) * 2, (R + 2) * 2);
+		this.drawLabels(ctx);
 		if (this.highlight !== null && this.slices.length > 0) {
 			const s = this.sliceAngle();
 			const a0 = -Math.PI / 2 + this.highlight * s;

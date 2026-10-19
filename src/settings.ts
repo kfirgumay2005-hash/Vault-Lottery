@@ -21,6 +21,8 @@ export interface Slice {
 	textColor: string;
 	/** Light glow around the label, 0 (none) … 1 (strong). */
 	textGlow: number;
+	/** Label size relative to the automatic fit, 0.5 … 1.5 (1 = automatic). */
+	textScale: number;
 }
 
 export interface Preset {
@@ -236,6 +238,7 @@ export function makeSlice(index: number, label?: string, id?: string): Slice {
 		color,
 		textColor: contrastText(color),
 		textGlow: 0,
+		textScale: 1,
 	};
 }
 
@@ -479,6 +482,7 @@ function normalizeSlice(s: unknown, i: number): Slice {
 	// Older image slices always had a light glow behind the label: keep that look.
 	if (isPlainObject(s) && s.textGlow === undefined && m.fillType === "image") m.textGlow = 0.4;
 	m.textGlow = Number.isFinite(m.textGlow) ? Math.max(0, Math.min(1, m.textGlow)) : 0;
+	m.textScale = Number.isFinite(m.textScale) ? Math.max(0.5, Math.min(1.5, m.textScale)) : 1;
 	if (m.fillType !== "image" || !m.image) m.fillType = m.fillType === "image" && m.image ? "image" : "color";
 	return m;
 }
