@@ -1,7 +1,7 @@
 # Vault Lottery — notes for Claude
 
 Obsidian plugin (TypeScript, esbuild, no UI framework) with four randomizer games in the right sidebar.
-The folder _is_ the installed plugin inside the user's vault (`.obsidian/plugins/Vault Lottery`, id `vault-lottery`).
+The folder _is_ the installed plugin inside the user's vault (`.obsidian/plugins/Vault Lottery`, id `vaultlottery`).
 Original spec: `VAULT_LOTTERY_SPEC.md`.
 
 ## Working here
